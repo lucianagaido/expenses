@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "start": "vercel dev"
+    "start": "vercel dev",
+    "test": "node tests/expenses.test.js"
   },
   "keywords": ["vercel", "serverless", "api", "expenses"],
   "author": "Your Name",
