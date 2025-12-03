@@ -1,5 +1,3 @@
-// /api/expenses.js
-
 let expenses = []; // in-memory storage (resets when the function reloads)
 
 export default function handler(req, res) {
@@ -21,7 +19,6 @@ export default function handler(req, res) {
     const missing = [];
     if (amount == null) missing.push("amount");
     if (!description) missing.push("description");
-    if (!category) missing.push("category");
     if (!date) missing.push("date");
 
     if (missing.length > 0) {
@@ -37,7 +34,7 @@ export default function handler(req, res) {
       id: expenses.length + 1,
       amount,
       description,
-      category,
+      category: category || 'Uncategorized', // Default to 'Uncategorized' if no category is provided
       date,
     };
 
@@ -57,3 +54,4 @@ export default function handler(req, res) {
     error: `Method ${req.method} Not Allowed`,
   });
 }
+
