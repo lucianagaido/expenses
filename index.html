@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            max-width: 900px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input[type="text"], input[type="number"], input[type="date"] {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .expenses-list {
+            margin-top: 20px;
+        }
+
+        .expense-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .expense-item span {
+            font-weight: bold;
+        }
+
+        .expense-item p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Expenses Tracker</h1>
+    </header>
+
+    <div class="container">
+        <!-- Form for adding new expenses -->
+        <form id="expenseForm">
+            <input type="text" id="description" placeholder="Description" required>
+            <input type="number" id="amount" placeholder="Amount" required>
+            <input type="date" id="date" required>
+            <button type="submit">Add Expense</button>
+        </form>
+
+        <!-- Display list of expenses -->
+        <div class="expenses-list" id="expensesList">
+            <h2>All Expenses</h2>
+            <div id="expenseItems"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://<your-vercel-project>.vercel.app/api/expenses'; // Replace with your Vercel API URL
+
+        // Elements
+        const expenseForm = document.getElementById('expenseForm');
+        const descriptionInput = document.getElementById('description');
+        const amountInput = document.getElementById('amount');
+        const dateInput = document.getElementById('date');
+        const expenseItems = document.getElementById('expenseItems');
+
+        // Fetch and display expenses on page load
+        async function loadExpenses() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                if (data.success) {
+                    expenseItems.innerHTML = '';
+                    data.data.forEach(expense => {
+                        const expenseElement = document.createElement('div');
+                        expenseElement.classList.add('expense-item');
+                        expenseElement.innerHTML = `
+                            <p><span>Description:</span> ${expense.description}</p>
+                            <p><span>Amount:</span> $${expense.amount}</p>
+                            <p><span>Date:</span> ${expense.date}</p>
+                        `;
+                        expenseItems.appendChild(expenseElement);
+                    });
+                } else {
+                    expenseItems.innerHTML = '<p>No expenses found!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading expenses:', error);
+                expenseItems.innerHTML = '<p>Error loading expenses!</p>';
+            }
+        }
+
+        // Submit new expense via POST request
+        expenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const newExpense = {
+                description: descriptionInput.value,
+                amount: parseFloat(amountInput.value),
+                date: dateInput.value
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newExpense)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    // Reset the form
+                    descriptionInput.value = '';
+                    amountInput.value = '';
+                    dateInput.value = '';
+                    loadExpenses();  // Reload the expenses list
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error adding expense:', error);
+                alert('Error adding expense!');
+            }
+        });
+
+        // Load expenses when the page loads
+        window.onload = loadExpenses;
+    </script>
+</body>
+
+</html>
