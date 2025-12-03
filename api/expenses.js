@@ -1,10 +1,9 @@
-// /api/expenses.js
+/let expenses = []; // in-memory storage (resets when the function reloads)
 
-let expenses = []; // in-memory storage (resets when the function reloads)
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader("Content-Type", "application/json");
 
+  // Handle GET request
   if (req.method === "GET") {
     return res.status(200).json({
       success: true,
@@ -12,14 +11,16 @@ export default function handler(req, res) {
     });
   }
 
+  // Handle POST request
   if (req.method === "POST") {
+    // Make sure to parse the request body
     const { amount, description, category, date } = req.body || {};
 
     // Validate fields
     const missing = [];
     if (amount == null) missing.push("amount");
     if (!description) missing.push("description");
-    if (!category) missing.push("category");
+    if (!category) missing.push("category"); // Optional, remove if not used in the frontend
     if (!date) missing.push("date");
 
     if (missing.length > 0) {
@@ -29,6 +30,33 @@ export default function handler(req, res) {
         missingFields: missing,
       });
     }
+
+    // Create a new expense object
+    const newExpense = {
+      id: expenses.length + 1,
+      amount,
+      description,
+      category: category || "Uncategorized", // Default to "Uncategorized" if category is missing
+      date,
+    };
+
+    // Store the new expense
+    expenses.push(newExpense);
+
+    // Send a successful response with the new expense
+    return res.status(201).json({
+      success: true,
+      message: "Expense added successfully",
+      data: newExpense,
+    });
+  }
+
+  // Handle unsupported methods
+  return res.status(405).json({
+    success: false,
+    error: `Method ${req.method} Not Allowed`,
+  });
+}
 
     const newExpense = {
       id: expenses.length + 1,
